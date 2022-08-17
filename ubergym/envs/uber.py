@@ -7,10 +7,10 @@ from typing import Optional, List, Tuple
 from collections import OrderedDict
 import logging, sys
 
-from envs.maps import Map
-from envs.actors import Driver, Passenger, Matcher
-from envs.match_request import MatchRequest
-import envs.constants as constants
+from ubergym.envs.maps import Map
+from ubergym.envs.actors import Driver, Passenger, Matcher
+from ubergym.envs.match_request import MatchRequest
+import ubergym.envs.constants as constants
 
 # logging config
 logging.basicConfig(

@@ -19,7 +19,7 @@ class Passenger:
     driver: Optional[int] = None
     
 
-from envs.match_request import MatchRequest
+from ubergym.envs.match_request import MatchRequest
 
 @dataclass
 class Driver:

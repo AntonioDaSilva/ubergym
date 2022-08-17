@@ -39,11 +39,15 @@ step = 0
 
 while not done:
     logging.info(f'Step: {step}')
-    action = driver.action(observations)
+    vectorized_observations = np.array(list(observations.values()))
+    observation = vectorized_observations[:,0]
+    action = driver.action(observation)
+    driver.log()
     observations, rewards, done, info = env.step([action])
     driver.add_reward(rewards[0])
     driver.log()
     step += 1
+    #done = True
 
 plt.plot(np.arange(len(driver.rewards)), driver.rewards)
 plt.show()

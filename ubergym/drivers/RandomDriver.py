@@ -5,8 +5,7 @@ import numpy as np
 
 # logging config
 logging.basicConfig(
-    format='%(asctime)s\t%(message)s',
-    datefmt='%m/%d/%Y %I:%M:%S %p',
+    format='%(message)s',
     stream=sys.stdout,
     level=logging.INFO,
 )
@@ -58,23 +57,26 @@ class Driver:
         self.messages.append(f'Reward = {reward}')
 
     def _log_observation(self, observation):
-        state = self.state_to_message[observation["state"][self.name]]
+        driver_msg = f'Driver {self.name}'
+        state = self.state_to_message[observation[0]]
         state_msg = f'State = {state}'
-        position_msg = f'Position = {observation["position"][self.name]}'
-        p_destination_msg = f'Passenger Destination = {observation["passenger_destination"][self.name]}'
-        p_position_msg = f'Passenger Position = {observation["passenger_position"][self.name]}'
-        price_message = f'Price = {observation["price"][self.name]}'
+        position_msg = f'Position = {observation[1]}'
+        p_destination_msg = f'Passenger Destination = {observation[2]}'
+        p_position_msg = f'Passenger Position = {observation[3]}'
+        price_message = f'Price = {observation[4]}'
 
+        message = driver_msg + '\t' + state_msg + '\t' + position_msg
         
-        if state == "IDLE":
-            self.messages.append(state_msg + '\t' + position_msg)
+        if state == "IDLE" or state == 'OFF':
+            self.messages.append(message)
         elif state == "MATCHING":
-            self.messages.append(state_msg + '\t' + position_msg + '\t' + p_destination_msg + '\t' + p_position_msg + '\t' + price_message)
+            message += '\t' + p_destination_msg + '\t' + p_position_msg + '\t' + price_message
+            self.messages.append(message)
         elif state == "MATCHED":
-            self.messages.append(state_msg + '\t' + position_msg + '\t' + p_destination_msg + '\t' + p_position_msg)
+            message += '\t' + p_destination_msg + '\t' + p_position_msg
+            self.messages.append(message)
         elif state == "RIDING":
-            self.messages.append(state_msg + '\t' + position_msg + '\t' + p_destination_msg)
-        elif state == "OFF":
-            self.messages.append(state_msg + '\t' + position_msg)
+            message += '\t' + p_destination_msg
+            self.messages.append(message)
 
         return 
