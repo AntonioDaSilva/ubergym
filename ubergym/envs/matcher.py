@@ -10,8 +10,6 @@ class Matcher:
         LEXICOGRAPHIC_MINMAX = 1
     
     method: str = 'LINEAR_SUM'
-    MEAN_PRICE_PER_DISTANCE: float = 5.0
-    VARIANCE_PER_PRICE: float = 0
 
     def __post_init__(self):
         if self.method == 'LINEAR_SUM':

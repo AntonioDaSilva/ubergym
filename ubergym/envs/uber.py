@@ -24,7 +24,7 @@ class Uber(gym.Env):
     metadata = constants.simulation["metadata"]
     matcher_metadata = constants.simulation["matcher_metadata"]
     
-    def __init__(self, n_drivers: int , passenger_generation_probabilities: np.ndarray  , graph: nx.DiGraph, matcher_type: Optional[str] = None, is_logging: bool = constants.simulation["is_logging"], seed: Optional[int] = None, render_mode: Optional[str] = None) -> None:
+    def __init__(self, n_drivers: int , passenger_generation_probabilities: np.ndarray  , graph: nx.DiGraph, num_steps: int = constants.simulation["num_steps"], matcher_type: Optional[str] = None, is_logging: bool = constants.simulation["is_logging"], seed: Optional[int] = None, render_mode: Optional[str] = None) -> None:
         
         if not(render_mode is None or render_mode in self.metadata["render_modes"]):
             raise ValueError(f"render_mode {render_mode} is not supported")
@@ -64,7 +64,7 @@ class Uber(gym.Env):
 
         self.step_count = constants.simulation["step_count"]
         self.step_size = constants.simulation["step_size"]
-        self.num_steps = constants.simulation["num_steps"] 
+        self.num_steps = num_steps
 
         self.drivers: List[Driver] = []
         for i in range(self.n_drivers):
