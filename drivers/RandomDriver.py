@@ -2,6 +2,9 @@ from typing import Iterable, List, Tuple
 from dataclasses import dataclass
 import logging, sys
 import numpy as np
+import networkx as nx
+
+from ubergym.envs.maps import Map
 
 # logging config
 logging.basicConfig(
@@ -14,6 +17,7 @@ logging.basicConfig(
 class Driver:
     name: int
     num_actions: int
+    graph: nx.DiGraph 
     is_logging: bool = False
 
     def __post_init__(self):
@@ -28,6 +32,7 @@ class Driver:
             3: "RIDING", 
             4: "OFF"
         }
+        self.map = Map(self.graph)
 
     def action(self, observation) -> int:
         self.observations.append(observation)
