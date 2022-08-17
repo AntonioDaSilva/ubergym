@@ -195,11 +195,12 @@ class Uber(gym.Env):
         pickup = False
         prev_position = d.position
         new_position = destination
+        passenger = None
 
         d.position = destination
         d.last_move = self.step_count
         reward += distance * constants.simulation["rewards"]["move"]
-
+        
         # if the driver has a passenger, move the passenger as well
         if d.status == Driver.Status.RIDING:
             p = self.passengers[d.passenger]
@@ -207,6 +208,7 @@ class Uber(gym.Env):
             # case of arrival at passenger's destination
             if p.position == p.destination:
                 arrival = True
+                passenger = d.passenger
                 reward += d.match_request.price * constants.simulation["rewards"]["arrive"]
                 d.match_request = None
                 d.status = Driver.Status.IDLE
@@ -219,10 +221,11 @@ class Uber(gym.Env):
             p = self.passengers[d.passenger]
             if p.position == d.position:
                 pickup = True
+                passenger = d.passenger
                 p.status = Passenger.Status.RIDING
                 d.status = Driver.Status.RIDING
 
-        self._log_move(driver, prev_position, new_position, arrival, pickup)
+        self._log_move(driver, prev_position, new_position, arrival, pickup, passenger)
 
         return reward
 
@@ -301,7 +304,8 @@ class Uber(gym.Env):
         for i in range(n):
             for j in range(m):
                 if solution[i,j] > 0.5:
-                    price = self._price(distance = costs[i][j])
+                    passenger = self.passengers[waiting_passengers[i]]
+                    price = self._price(distance = self.map.distance(passenger.position, passenger.destination))
                     match_requests.append(MatchRequest(driver = idle_drivers[j], passenger = waiting_passengers[i], price = price))
                     break
         
@@ -335,15 +339,15 @@ class Uber(gym.Env):
 
         self.messages.append(message)
 
-    def _log_move(self, driver: int, prev_position: int, new_position: int, arrival: bool = False, pickup: bool = False):
+    def _log_move(self, driver: int, prev_position: int, new_position: int, arrival: bool = False, pickup: bool = False, passenger: int = None):
         
         self.messages.append(f"Driver {driver} moved from {prev_position} to {new_position}.")
 
         if arrival:
-            self.messages.append(f"Driver {driver} arrived at passenger {self.drivers[driver].passenger}'s destination.")
+            self.messages.append(f"Driver {driver} arrived at passenger {passenger}'s destination.")
         
         if pickup:
-            self.messages.append(f"Driver {driver} picked up the passenger {self.drivers[driver].passenger}.")
+            self.messages.append(f"Driver {driver} picked up the passenger {passenger}.")
 
     def _log_match_request(self, match_request: MatchRequest):
 
