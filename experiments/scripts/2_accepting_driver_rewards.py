@@ -1,9 +1,10 @@
 import pickle
 import numpy as np
 import logging, sys
-
-import drivers.AcceptingDriver as AcceptingDriver
 import gym
+
+from constants import kwargs_single_driver
+import drivers.AcceptingDriver as AcceptingDriver
 
 # logging config
 logging.basicConfig(
@@ -13,16 +14,10 @@ logging.basicConfig(
 )
 
 
-#environment constants
-
-n_drivers = 1
-with open("../generate_graph/graph.pkl", "rb") as f:
-    G = pickle.load(f)
-passenger_generation_probabilities = [0.1] * len(G)
-
-# initialize environment
-env = gym.make('ubergym/uber-v0', n_drivers = n_drivers, passenger_generation_probabilities = passenger_generation_probabilities, graph = G)
-drivers = [AcceptingDriver.Driver(name = 0, num_actions = len(G), graph = G, is_logging = True)]
+env = gym.make('ubergym/uber-v0', **kwargs_single_driver)
+G = kwargs_single_driver["graph"]
+n_drivers = kwargs_single_driver["n_drivers"]
+drivers = [AcceptingDriver.Driver(i, len(G), G, True) for i in range(n_drivers)]
 
 # reset and loop through environment
 observations = env.reset()
@@ -42,7 +37,7 @@ while not done:
         drivers[i].log()
     step += 1
 
-rewards = drivers[0].rewards
-
-with open("./data/accepting_driver_rewards.pkl", "wb") as f:
-    pickle.dump(rewards, f)
+for i in range(n_drivers):
+    rewards = drivers[i].rewards
+    with open(f"data/accepting_driver{i}_rewards.pkl", "wb") as f:
+        pickle.dump(rewards, f)
