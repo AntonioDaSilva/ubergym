@@ -8,7 +8,8 @@ from collections import OrderedDict
 import logging, sys
 
 from ubergym.envs.maps import Map
-from ubergym.envs.actors import Driver, Passenger, Matcher
+from ubergym.envs.actors import Driver, Passenger
+from ubergym.envs.matcher import Matcher
 from ubergym.envs.match_request import MatchRequest
 import ubergym.envs.constants as constants
 
@@ -18,8 +19,6 @@ logging.basicConfig(
     stream=sys.stdout,
     level=logging.INFO,
 )
-
-
 
 class Uber(gym.Env):
     metadata = constants.simulation["metadata"]
