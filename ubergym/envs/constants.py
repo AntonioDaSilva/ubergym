@@ -5,7 +5,7 @@ This file contains the parameters of the simulation.
 simulation = {
     "step_count": 0,
     "step_size": 20,
-    "num_steps": 1000,
+    "num_steps": 200,
     "mean_price_per_distance": 4.0,
     "variance_per_price": 0.2,
     "rewards": {

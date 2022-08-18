@@ -1,4 +1,3 @@
-import re
 from typing import Iterable, List, Tuple
 from dataclasses import dataclass
 import logging, sys
