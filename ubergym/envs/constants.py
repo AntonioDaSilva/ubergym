@@ -16,7 +16,7 @@ simulation = {
         "invalid_action": 0,
     },
     "metadata": {"render_modes": [], "render_fps": None},
-    "matcher_metadata": {"types": ['LINEAR_SUM', 'LEXICOGRAPHIC_MINMAX'], "default": 'LINEAR_SUM'},
+    "matcher_metadata": {"types": ['LINEAR_SUM', 'LEXICOGRAPHIC_MINMAX', 'DYNAMIC'], "default": 'LINEAR_SUM'},
     "is_logging": True,
 
 }

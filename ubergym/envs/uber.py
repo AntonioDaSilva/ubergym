@@ -73,22 +73,23 @@ class Uber(gym.Env):
         self.step_size = self.edge_weight
         self.num_steps = num_steps
 
+        # initialize drivers and passengers
         self.drivers: List[Driver] = []
         for i in range(self.n_drivers):
             self.drivers.append(Driver(last_move = self.step_count, name = i, position = self.map.random_node(), status = Driver.Status.IDLE))
 
         self.passengers: List[Passenger] = []
 
+        # initialize matcher
         if not(matcher_type is None or matcher_type in self.matcher_metadata["types"]):
             raise ValueError(f"matcher_type {matcher_type} is not supported")
 
         if matcher_type is None:
             matcher_type = self.matcher_metadata["default"]
         self.matcher_type = matcher_type
-        self.matcher = Matcher(self.matcher_type)
-
         self.MEAN_PRICE_PER_DISTANCE = constants.simulation["mean_price_per_distance"]
         self.VARIANCE_PER_PRICE = constants.simulation["variance_per_price"]
+        self.matcher = Matcher(self.matcher_type, self.MEAN_PRICE_PER_DISTANCE, self.VARIANCE_PER_PRICE)
 
     def step(self, actions: np.ndarray) -> Tuple[np.ndarray, np.ndarray, bool, dict]:
 
@@ -275,7 +276,8 @@ class Uber(gym.Env):
         for match_request in match_requests:
             d = self.drivers[match_request.driver]
             p = self.passengers[match_request.passenger]
-            price = match_request.price
+            if d.status != Driver.Status.IDLE or p.status != Passenger.Status.WAITING:
+                continue
 
             d.status = Driver.Status.MATCHING
             d.match_request = match_request
@@ -285,44 +287,7 @@ class Uber(gym.Env):
 
     def _generate_match_requests(self) -> List[MatchRequest]:
 
-        match_requests: List[MatchRequest] = []
-
-        waiting_passengers = [i for i in range(len(self.passengers)) if self.passengers[i].status == Passenger.Status.WAITING]
-        idle_drivers = [i for i in range(len(self.drivers)) if self.drivers[i].status == Driver.Status.IDLE]
-
-        costs = np.zeros((len(waiting_passengers), len(idle_drivers)))  
-        n, m = costs.shape
-
-        if n == 0 or m == 0:
-            return match_requests
-        
-        for i in range(n):
-            for j in range(m):
-                # the function map.distance is lru cached, hence there are no recalculations
-                distance = self.map.distance(self.drivers[idle_drivers[j]].position, self.passengers[waiting_passengers[i]].position)
-                costs[i][j] = distance
-
-        solution = self.matcher.minimize_costs(costs)
-
-        if solution is None:
-            return match_requests
-
-        for i in range(n):
-            for j in range(m):
-                if solution[i,j] > 0.5:
-                    passenger = self.passengers[waiting_passengers[i]]
-                    price = self._price(distance = self.map.distance(passenger.position, passenger.destination))
-                    match_requests.append(MatchRequest(driver = idle_drivers[j], passenger = waiting_passengers[i], price = price))
-                    break
-        
-        return match_requests
-
-
-    def _price(self, distance: int) -> float:
-        mean_price = self.MEAN_PRICE_PER_DISTANCE * distance
-        variance_price = self.VARIANCE_PER_PRICE * mean_price  
-        price = max(0.0, np.random.normal(mean_price, variance_price))
-        return price
+        return self.matcher.match(self.drivers, self.passengers, self.map)
 
     def _check_graph(self, graph):
 
