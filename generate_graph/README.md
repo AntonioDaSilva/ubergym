@@ -1,0 +1,11 @@
+# Graph Generation
+
+The Ubergym environment requires the user to pass a graph of type `nx.DiGraph` on which the passengers and drivers will move. This folder includes an example random graph generation process for our environment. 
+
+There's one important detail that one should be aware of when generating a graph. The simulation runs in constant time-steps set by the parameter `step_size`. In each step of the simulation, after passengers are generated based on the stochastic process and the matchers send their match requests to the drivers, the drivers are asked to take action based on the state. When drivers choose to move, the simulation determines whether they can move to the requested destination or not, based on the logic that they should be able to move only if the time since they last moved and now is larger than the weight of the edge they want to move on. 
+
+This dynamic may cause some unrealistic scenarios to happen. For example, when the step size is larger than all of the weights, all travels on each edge will technically take one time-step of the simulation even though the edges might be of different weight. Or when the weight of the edge is larger than the step size and not a multiple of it, it might take more time than necessary to travel on an edge. These types of problems cause disruptions in data regarding the time dynamics of the simulation.
+
+To overcome this, we restrict the type of graphs to be used in this simulation to take a constant value. This way, one can set up the time step of the simulation to be the value of this constant weight which makes all the time dynamics run smoothly. Furthermore, we assume that the graph is directed and strongly connected to prevent issues such as having a node that is disconnected from the rest of the graph. When you pass your graph to the simulation, these features will be checked before the simulation is initialized. 
+
+For the example, you can look at the `generate_graph.ipynb` Jupyter Notebook where we generate a graph using the `networkx` library's `connected_caveman_graph` function and save it as a `pickle` file in order to be used later in the simulation. 

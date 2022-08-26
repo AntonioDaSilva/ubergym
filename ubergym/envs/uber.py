@@ -24,7 +24,16 @@ class Uber(gym.Env):
     metadata = constants.simulation["metadata"]
     matcher_metadata = constants.simulation["matcher_metadata"]
     
-    def __init__(self, n_drivers: int , passenger_generation_probabilities: np.ndarray  , graph: nx.DiGraph, num_steps: int = constants.simulation["num_steps"], matcher_type: Optional[str] = None, is_logging: bool = constants.simulation["is_logging"], seed: Optional[int] = None, render_mode: Optional[str] = None) -> None:
+    def __init__(
+        self, 
+        n_drivers: int, 
+        passenger_generation_probabilities: np.ndarray, 
+        graph: nx.DiGraph, 
+        num_steps: Optional[int] = constants.simulation["num_steps"], 
+        matcher_type: Optional[str] = None, 
+        is_logging: Optional[bool] = constants.simulation["is_logging"], 
+        seed: Optional[int] = None, 
+        render_mode: Optional[str] = None) -> None:
         
         if not(render_mode is None or render_mode in self.metadata["render_modes"]):
             raise ValueError(f"render_mode {render_mode} is not supported")
@@ -38,9 +47,7 @@ class Uber(gym.Env):
         
         self.n_drivers = n_drivers
 
-        # only allow strongly connected graphs
-        if not nx.is_strongly_connected(graph):
-            raise ValueError("graph is not strongly connected")
+        self.edge_weight = self._check_graph(graph)
         
         self.map = Map(graph)
 
@@ -63,7 +70,7 @@ class Uber(gym.Env):
         self.action_space = spaces.MultiDiscrete([len(self.map)] * self.n_drivers)
 
         self.step_count = constants.simulation["step_count"]
-        self.step_size = constants.simulation["step_size"]
+        self.step_size = self.edge_weight
         self.num_steps = num_steps
 
         self.drivers: List[Driver] = []
@@ -316,6 +323,32 @@ class Uber(gym.Env):
         variance_price = self.VARIANCE_PER_PRICE * mean_price  
         price = max(0.0, np.random.normal(mean_price, variance_price))
         return price
+
+    def _check_graph(self, graph):
+
+        # only allow nx.DiGraph
+        if not type(graph) is nx.DiGraph:
+            raise TypeError("graph should be of type nx.DiGraph")
+
+        # only allow strongly connected graphs
+        if not nx.is_strongly_connected(graph):
+            raise ValueError("graph is not strongly connected")
+        
+        # only allow constant weights
+        weight = None
+        for u,v,d in graph.edges(data=True):
+            try:
+                edge_weight = d["weight"]
+            except:
+                raise ValueError("edges of the graphs should have the weight attribute")
+
+            if weight is None:
+                weight = edge_weight
+            elif edge_weight != weight:
+                raise ValueError("edges of the graph should have constant weight")
+
+        return weight
+
 
     def _log(self):
         if not self.is_logging:
