@@ -18,3 +18,11 @@ git clone https://github.com/AntonioDaSilva/ubergym.git
 cd ubergym
 pip3 install -e .
 ```
+
+# Simulation: How it Works?
+
+The simulation implements the following dynamic:
+
+1. Passengers are generated based on the `passenger_generation_probabilities` parameter on each node with random destinations.
+2. Matchers match drivers and passengers based on the pre-specified protocol for matching and pricing.
+3. Drivers are asked for their action which can be either to move to a different node or accept or reject a given match request and these actions are carried out by the simulation.
