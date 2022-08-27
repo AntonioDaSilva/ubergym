@@ -16,6 +16,8 @@ class Passenger:
     destination: int
     status: Status
     spawned_at: int
+    picked_up_at: Optional[int] = None
+    arrived_at: Optional[int] = None
     driver: Optional[int] = None
     
 

@@ -9,7 +9,7 @@ from ubergym.envs.maps import Map
 # logging config
 logging.basicConfig(
     format='%(message)s',
-    stream=sys.stdout,
+    filename='logs.log',
     level=logging.INFO,
 )
 

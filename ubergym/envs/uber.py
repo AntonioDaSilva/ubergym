@@ -16,7 +16,7 @@ import ubergym.envs.constants as constants
 # logging config
 logging.basicConfig(
     format='%(message)s',
-    stream=sys.stdout,
+    filename='logs.log',
     level=logging.INFO,
 )
 
@@ -222,6 +222,7 @@ class Uber(gym.Env):
                 d.passenger = None
                 p.status = Passenger.Status.ARRIVED
                 p.driver = None
+                p.arrived_at = self.step_count
         
         # if the driver is matched with a passenger, pick up the passenger upon arrival
         elif d.status == Driver.Status.MATCHED:
@@ -231,6 +232,7 @@ class Uber(gym.Env):
                 passenger = d.passenger
                 p.status = Passenger.Status.RIDING
                 d.status = Driver.Status.RIDING
+                p.picked_up_at = self.step_count
 
         self._log_move(driver, prev_position, new_position, arrival, pickup, passenger)
 
